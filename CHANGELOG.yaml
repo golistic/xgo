@@ -1,0 +1,8 @@
+xgo:
+  - meta:
+      projectURL: https://github.com/golistic/xgo
+      description: |
+        Extra Go functionality organized like the Go's standard library.
+  - versions:
+      - version: v0.9
+        date: 2023-08-14
