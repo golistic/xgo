@@ -17,6 +17,8 @@ func Eq(t *testing.T, expect, have any, messages ...string) {
 }
 
 func eq(t *testing.T, out io.Writer, expect, have any, messages ...string) {
+
+	TestHelper(t)
 	diff := fmt.Sprintf("\n\u001b[31;1mexpect:\t\u001b[0m%v\n\u001b[31;1mhave:\t\u001b[0m%v", expect, have)
 
 	if isNil(expect) || isNil(have) {
