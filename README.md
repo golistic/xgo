@@ -16,8 +16,14 @@ maintenance, so we decided to revert back to a single repository: `xgo`.
 Index
 -----
 
+* `xconv` provides functionality to convert things to other things (inspired by 
+  standard library `strconv` but not limited to strings)
 * `xnet` provides extra functionality around network I/O
-* `xt` offers wrappers around the `testing` standard package; the name was kept short because it used a lot
+* `xos` offers extra functionality around files and anything operating system related
+* `xstrings` extends `strings` with useful helpers
+* `xt` offers wrappers around the `testing` standard package; the name was kept
+  short because it used a lot
+* `xtime` provides helpers around `time.Time`
 
 License
 -------
