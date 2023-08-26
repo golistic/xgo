@@ -4,5 +4,7 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.0
+        date: 2023-08-26
       - version: v0.9
         date: 2023-08-14
