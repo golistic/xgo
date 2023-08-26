@@ -29,7 +29,7 @@ func ok(t *testing.T, out io.Writer, err error, messages ...string) {
 
 // KO checks whether err is not nil.
 //
-// Reverse of OK, and also, well, you know 🥊.
+// Reverse of OK, and also, well, you know 💥🥊.
 //
 // This could be replaced with using Eq, but since checking the error in Go
 // is done lots, it is nicer to read in tests.
@@ -39,6 +39,8 @@ func KO(t *testing.T, err error, messages ...string) {
 }
 
 func ko(t *testing.T, out io.Writer, err error, messages ...string) {
+	TestHelper(t)
+
 	if err == nil {
 		if len(messages) > 0 {
 			messages = append([]string{"--"}, messages...)
