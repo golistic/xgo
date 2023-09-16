@@ -4,6 +4,10 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.1
+        date: 2023-09-16
+        added:
+          - package xptr containing helper function `Of` to create pointers from values
       - version: v1.0
         date: 2023-08-26
       - version: v0.9
