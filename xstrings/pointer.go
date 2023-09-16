@@ -2,7 +2,11 @@
 
 package xstrings
 
+import "github.com/golistic/xgo/xptr"
+
 // Pointer returns string typed s as pointer.
+//
+// Deprecated: use xptr.To().
 func Pointer[T ~string](s T) *T {
-	return &s
+	return xptr.Of(s)
 }
