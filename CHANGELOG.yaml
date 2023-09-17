@@ -4,6 +4,10 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.2
+        date: 2023-09-17
+        added:
+          - package xslice extends the slice package with first function `AsAny`
       - version: v1.1
         date: 2023-09-16
         added:
