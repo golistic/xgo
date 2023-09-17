@@ -21,6 +21,7 @@ Index
 * `xnet` provides extra functionality around network I/O
 * `xos` offers extra functionality around files and anything operating system related
 * `xptr` getting pointer to value
+* `xslice` add functionality around slices extending `slice`
 * `xsql` provides extra functionality around SQL drivers including managing DSN (Data Source Name)
 * `xstrings` extends `strings` with useful helpers
 * `xt` offers wrappers around the `testing` standard package; the name was kept
