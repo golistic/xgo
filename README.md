@@ -25,7 +25,7 @@ add some more like `xconv` and `xptr`.
 * `xnet` - from validating email addresses to finding te next free TCP port
 * `xos` - wrapping around `os` with functions like `IsDir` or `IsRegularFile` and mapping environment
 * `xptr` - getting pointer to value; probably the most reimplemented functionality 
-* `xreflect` - hand tools doing reflection such as `PatchStruct`
+* `xreflect` - handy tools doing reflection such as `PatchStruct`
 * `xslice` - missing pieces of `slice`, with for example `AsAny` to return any slice as `[]any`
 * `xsql` - extra functionality around SQL drivers including managing DSN (Data Source Name)
 * `xstrings` - extends `strings` with useful helpers such as generic `Join` and `RepeatJoin`
