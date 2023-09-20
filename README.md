@@ -8,7 +8,8 @@ in each project. It is organized in sub-packages which mimic the Go standard
 library.
 
 `xgo` is meanly used by other projects the author is maintaining and does nothing
-extraordinary except taking away the tedious repeating.  
+extraordinary except taking away the tedious repeating.
+
 The package grew from an old package, which was split into various separate
 repositories within github.com/golistic. However, this is way too much overhead and
 maintenance, so we decided to revert back to a single repository: `xgo`.
@@ -16,17 +17,20 @@ maintenance, so we decided to revert back to a single repository: `xgo`.
 Index
 -----
 
-* `xconv` provides functionality to convert things to other things (inspired by 
-  standard library `strconv` but not limited to strings)
-* `xnet` provides extra functionality around network I/O
-* `xos` offers extra functionality around files and anything operating system related
-* `xptr` getting pointer to value
-* `xslice` add functionality around slices extending `slice`
-* `xsql` provides extra functionality around SQL drivers including managing DSN (Data Source Name)
-* `xstrings` extends `strings` with useful helpers
-* `xt` offers wrappers around the `testing` standard package; the name was kept
-  short because it used a lot
-* `xtime` provides helpers around `time.Time`
+The following list shows sub-packages of `xgo`. Most have the same names as their
+counterparts in the Go standard library, for example, `xos` and `os`. However, we
+add some more like `xconv` and `xptr`.
+
+* `xconv` - (basic) type conversions similar 
+* `xnet` - from validating email addresses to finding te next free TCP port
+* `xos` - wrapping around `os` with functions like `IsDir` or `IsRegularFile` and mapping environment
+* `xptr` - getting pointer to value; probably the most reimplemented functionality 
+* `xreflect` - hand tools doing reflection such as `PatchStruct`
+* `xslice` - missing pieces of `slice`, with for example `AsAny` to return any slice as `[]any`
+* `xsql` - extra functionality around SQL drivers including managing DSN (Data Source Name)
+* `xstrings` - extends `strings` with useful helpers such as generic `Join` and `RepeatJoin`
+* `xt` - basic wrappers around the `testing` standard package but with a short name
+* `xtime` - helpers around `time.Time`
 
 License
 -------
