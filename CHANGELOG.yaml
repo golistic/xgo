@@ -4,6 +4,10 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.3
+        date: 2023-09-20
+        added:
+          - package xreflect offers handy tools doing reflection such as `PatchStruct`
       - version: v1.2
         date: 2023-09-17
         added:
