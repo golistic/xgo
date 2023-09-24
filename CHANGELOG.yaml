@@ -8,6 +8,12 @@ xgo:
         date: 2023-09-20
         added:
           - package xreflect offers handy tools doing reflection such as `PatchStruct`
+        patches:
+          - version: v1.3.1
+            date: 2023-09-24
+            fixed:
+              xreflect:
+                - patching using pointer values
       - version: v1.2
         date: 2023-09-17
         added:
