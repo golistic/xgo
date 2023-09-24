@@ -12,8 +12,10 @@ import (
 
 // PatchStruct patches target with values found in patcher with both target and patcher
 // being structs.
-// Only fields with same name, type, and kind (cannot update pointer values with non
-// pointer values) are updated.
+//
+// Only fields with same name and type can be updated.
+//
+// # When target is a pointer, and
 //
 // The fields-argument can be used to select which fields gets patched (case-insensitive).
 // If the fields-argument is not provided, all fields of patcher are used to update target.
@@ -37,7 +39,7 @@ func PatchStruct(target any, patcher any, fields ...string) (bool, error) {
 	for i := 0; i < len(patchFields); i++ {
 		var patchField = patchFields[i]
 
-		if !patchField.Field.IsExported() {
+		if !patchField.Field.IsExported() || !patchField.Value.IsValid() {
 			continue
 		}
 
@@ -58,9 +60,26 @@ func PatchStruct(target any, patcher any, fields ...string) (bool, error) {
 		}
 
 		targetField := reflect.Indirect(rvTarget).FieldByName(patchField.Field.Name)
+
+		// allow patching of non-pointer fields using pointer
+		if patchField.IsPointer() && targetField.Kind() != reflect.Pointer {
+			if patchField.Value.IsNil() {
+				// we do not touch target
+				continue
+			}
+			patchField.Value = patchField.Value.Elem()
+		}
+
 		if pk, tk := patchField.Value.Kind(), targetField.Kind(); pk != tk {
-			return false, fmt.Errorf("patching field %s (type mismatch; patcher.%s <> target.%s)",
-				patchField.Field.Name, pk.String(), tk.String())
+			fmt.Println("### patchField", patchField.Value)
+			fmt.Println("### patchField", patchField.Value, patchField.Value.Type(), patchField.Value.Kind())
+			return false, fmt.Errorf("patching field %s (kind mismatch; target.%s <> patcher.%s)",
+				patchField.Field.Name, tk.String(), pk.String())
+		}
+
+		if pk, tk := patchField.Value.Type(), targetField.Type(); pk != tk {
+			return false, fmt.Errorf("patching field %s (type mismatch; target.%s <> patcher.%s)",
+				patchField.Field.Name, tk.String(), pk.String())
 		}
 
 		if !reflect.DeepEqual(patchField.Value.Interface(), targetField) {

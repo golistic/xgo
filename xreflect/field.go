@@ -4,7 +4,9 @@
 
 package xreflect
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type StructField struct {
 	Field reflect.StructField
@@ -28,4 +30,8 @@ func GetFields(v reflect.Value) []*StructField {
 	}
 
 	return fields
+}
+
+func (s *StructField) IsPointer() bool {
+	return s.Value.Kind() == reflect.Ptr
 }

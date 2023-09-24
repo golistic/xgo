@@ -6,6 +6,7 @@ package xreflect_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/golistic/xgo/xptr"
 	"github.com/golistic/xgo/xreflect"
@@ -43,25 +44,33 @@ func TestPatchStruct(t *testing.T) {
 		})
 	})
 
-	t.Run("fail patching with patcher using pointer-field", func(t *testing.T) {
+	t.Run("patching with patcher using pointer-field", func(t *testing.T) {
 
 		type targetType struct {
 			FieldInt    int
 			FieldPtrInt *int
+			FieldTime   time.Time
 		}
 
 		target := &targetType{}
 
 		type patcherType struct {
-			FieldInt *int
+			FieldInt  *int
+			FieldTime *time.Time
 		}
 
-		patcher := &patcherType{FieldInt: xptr.Of(5)}
+		expInt := 5
+		exptTime := time.Now()
+		patcher := &patcherType{
+			FieldInt:  xptr.Of(expInt),
+			FieldTime: xptr.Of(exptTime),
+		}
 
 		patched, err := xreflect.PatchStruct(target, patcher)
-		xt.KO(t, err)
-		xt.Assert(t, !patched)
-		xt.Eq(t, "patching field FieldInt (type mismatch; patcher.ptr <> target.int)", err.Error())
+		xt.OK(t, err)
+		xt.Assert(t, patched)
+		xt.Eq(t, expInt, target.FieldInt)
+		xt.Eq(t, exptTime, target.FieldTime)
 	})
 
 	t.Run("fail patching with target having pointer-field", func(t *testing.T) {
@@ -82,7 +91,7 @@ func TestPatchStruct(t *testing.T) {
 		patched, err := xreflect.PatchStruct(target, patcher)
 		xt.KO(t, err)
 		xt.Assert(t, !patched)
-		xt.Eq(t, "patching field FieldPtrInt (type mismatch; patcher.int <> target.ptr)", err.Error())
+		xt.Eq(t, "patching field FieldPtrInt (kind mismatch; target.ptr <> patcher.int)", err.Error())
 	})
 
 	t.Run("using embedded struct", func(t *testing.T) {
@@ -113,5 +122,67 @@ func TestPatchStruct(t *testing.T) {
 		xt.Assert(t, patched)
 		xt.Eq(t, patcher.FieldInt, target.FieldInt)
 		xt.Eq(t, patcher.FieldPtrInt, target.FieldPtrInt)
+	})
+
+	t.Run("patching pointer fields with same type", func(t *testing.T) {
+		type targetType struct {
+			FieldPtr *string
+		}
+
+		target := &targetType{}
+
+		type patcherType struct {
+			FieldPtr *string
+		}
+
+		exp := xptr.Of("pointer")
+		patcher := &patcherType{FieldPtr: exp}
+
+		patched, err := xreflect.PatchStruct(target, patcher)
+		xt.OK(t, err)
+		xt.Assert(t, patched)
+		xt.Eq(t, exp, target.FieldPtr)
+	})
+
+	t.Run("patching with nil leaves value in target untouched", func(t *testing.T) {
+
+		type targetType struct {
+			Field string
+		}
+
+		exp := "leave me be"
+		target := &targetType{
+			Field: exp,
+		}
+
+		type patcherType struct {
+			Field *string
+		}
+
+		patcher := &patcherType{}
+
+		patched, err := xreflect.PatchStruct(target, patcher)
+		xt.OK(t, err)
+		xt.Assert(t, !patched)
+		xt.Eq(t, exp, target.Field)
+	})
+
+	t.Run("fail patching with different types", func(t *testing.T) {
+		type targetType struct {
+			FieldPtr *int
+		}
+
+		target := &targetType{}
+
+		type patcherType struct {
+			FieldPtr *string
+		}
+
+		patcher := &patcherType{FieldPtr: xptr.Of("pointer")}
+
+		patched, err := xreflect.PatchStruct(target, patcher)
+		xt.KO(t, err)
+		xt.Assert(t, !patched)
+		xt.Eq(t, "patching field FieldPtr (type mismatch; target.*int <> patcher.*string)", err.Error())
 	})
 }
