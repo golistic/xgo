@@ -4,6 +4,10 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.4
+        date: 2023-09-26
+        added:
+          - package xrand over functionality returning random data
       - version: v1.3
         date: 2023-09-20
         added:
