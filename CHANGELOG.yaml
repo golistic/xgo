@@ -4,6 +4,11 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.5
+        date: 2023-09-27
+        added:
+          xt:
+            - add log aggregation helper
       - version: v1.4
         date: 2023-09-26
         added:
