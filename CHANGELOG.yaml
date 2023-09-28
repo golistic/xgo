@@ -9,6 +9,11 @@ xgo:
         added:
           xt:
             - add log aggregation helper
+        patches:
+          - version: v1.5.1
+            fixed:
+              xt:
+                - return all entries of LogAgg
       - version: v1.4
         date: 2023-09-26
         added:
