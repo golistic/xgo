@@ -44,4 +44,27 @@ func TestLogAgg(t *testing.T) {
 			xt.Eq(t, exp, have["line"])
 		}
 	})
+
+	t.Run("get all entries", func(t *testing.T) {
+		la := xt.NewLogAgg()
+
+		exp := []string{
+			"line 1",
+			"line 2",
+			"line 3",
+		}
+
+		for _, entry := range exp {
+			_, err := la.Write([]byte(entry))
+			xt.OK(t, err)
+		}
+
+		xt.Eq(t, exp, la.Entries())
+
+		exp = append(exp, "line 4")
+		_, err := la.Write([]byte(exp[len(exp)-1]))
+		xt.OK(t, err)
+
+		xt.Eq(t, exp, la.Entries())
+	})
 }
