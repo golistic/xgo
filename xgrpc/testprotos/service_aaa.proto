@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package services;
+option go_package = "./;services";
+
+service AAAService {
+  rpc Method1(Method1Request) returns (Method1Reply);
+}
+
+message Method1Request {
+  string something = 1;
+}
+
+message Method1Reply {
+  bool ok = 1;
+}
