@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package services;
+option go_package = "./;services";
+
+service BBBService {
+  rpc MethodB(MethodBRequest) returns (MethodBReply);
+}
+
+message MethodBRequest {
+  string something = 1;
+}
+
+message MethodBReply {
+  bool ok = 1;
+}
