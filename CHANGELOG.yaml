@@ -4,6 +4,12 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.6
+        date: 2023-11-15
+        added:
+          xgrpc:
+            - packages xgrpc offers helper functionality around gRPC with first two functions
+              `xgrpc.CheckServiceAvailability` and `xgrpc.ErrorFromRPC`
       - version: v1.5
         date: 2023-09-27
         added:
