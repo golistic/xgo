@@ -10,6 +10,12 @@ xgo:
           xgrpc:
             - packages xgrpc offers helper functionality around gRPC with first two functions
               `xgrpc.CheckServiceAvailability` and `xgrpc.ErrorFromRPC`
+        patches:
+          - version: v1.6.1
+            date: 2023-11-24
+            fixed:
+              xgrpc:
+                - trim prefixes from gRPC errors and use quoted messages
       - version: v1.5
         date: 2023-09-27
         added:
