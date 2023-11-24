@@ -95,7 +95,7 @@ func TestCheckServiceAvailability(t *testing.T) {
 		err = xgrpc.CheckServiceAvailability(fmt.Sprintf("127.0.0.1:%d", port),
 			"some.Service",
 			grpc.WithTransportCredentials(insecure.NewCredentials()))
-		xt.Assert(t, errors.Is(err, xgrpc.ErrServerUnavailable))
+		xt.Assert(t, errors.Is(errors.Unwrap(err), xgrpc.ErrServerUnavailable))
 	})
 
 	t.Run("does not work without reflection", func(t *testing.T) {
@@ -116,7 +116,7 @@ type AAAServiceServer struct {
 	services.UnimplementedAAAServiceServer
 }
 
-func (A AAAServiceServer) Method1(ctx context.Context, request *services.Method1Request) (*services.Method1Reply, error) {
+func (A AAAServiceServer) Method1(context.Context, *services.Method1Request) (*services.Method1Reply, error) {
 	return &services.Method1Reply{Ok: true}, nil
 }
 
@@ -124,7 +124,7 @@ type BBBServiceServer struct {
 	services.UnimplementedBBBServiceServer
 }
 
-func (B BBBServiceServer) MethodB(ctx context.Context, request *services.MethodBRequest) (*services.MethodBReply, error) {
+func (B BBBServiceServer) MethodB(context.Context, *services.MethodBRequest) (*services.MethodBReply, error) {
 	return &services.MethodBReply{Ok: true}, nil
 }
 
