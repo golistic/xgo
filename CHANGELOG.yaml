@@ -4,6 +4,15 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.7.0
+        date: 2023-12-11
+        added:
+          xtime:
+            - Add `Midday` and `UTCMidday`
+              The `Midday` function returns the current local time adjusted to midday (12:00 PM),
+              while the `UTCMidday` function returns the current time in the UTC timezone, adjusted
+              to midday. These functions are valuable for creating a standard timestamp where the
+              specific time is not as significant as the date.
       - version: v1.6
         date: 2023-11-15
         added:
