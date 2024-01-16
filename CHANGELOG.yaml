@@ -13,6 +13,12 @@ xgo:
               while the `UTCMidday` function returns the current time in the UTC timezone, adjusted
               to midday. These functions are valuable for creating a standard timestamp where the
               specific time is not as significant as the date.
+        patches:
+          - version: v1.7.1
+            date: 2024-01-16
+            fixed:
+              xt:
+                - make ok() a Go test helper function
       - version: v1.6
         date: 2023-11-15
         added:
