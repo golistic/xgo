@@ -4,6 +4,13 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.8.0
+        date: 2024-01-24
+        added:
+          xtime:
+            - Add `MiddayForDate` and `UTCMiddayForDate`
+              Both functions do the same as `Midday` and `UTCMidday` respectively but for a specific date.
+              The date is passed as year, month, day, just like Go's `time.Date()`.
       - version: v1.7.0
         date: 2023-12-11
         added:
