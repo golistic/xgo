@@ -7,6 +7,14 @@ xgo:
       - version: v1.8.0
         date: 2024-01-24
         added:
+          xstring:
+            - ScanTokens scans a string and returns a slice of tokens.
+              Tokens are separated by whitespace, unless they are within quotes. If a token is within
+              quotes, the whitespace is preserved within the token.
+              Any character that is not whitespace or a quote is part of a token.
+      - version: v1.8.0
+        date: 2024-01-24
+        added:
           xtime:
             - Add `MiddayForDate` and `UTCMiddayForDate`
               Both functions do the same as `Midday` and `UTCMidday` respectively but for a specific date.
