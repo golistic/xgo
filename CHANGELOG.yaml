@@ -4,8 +4,16 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
-      - version: v1.8.0
-        date: 2024-01-24
+      - version: v1.10.0
+        date: 2024-04-26
+        added:
+          xfs:
+            - Add `xfs.IsDir` checking whether the argument is a directory within `fs.FS`.
+          xptr:
+            - `xptr.ValueOr` returns the first non-nil value. If the first argument is not nil,
+              it is returned. Otherwise, the second argument is returned.
+      - version: v1.9.0
+        date: 2024-02-09
         added:
           xstring:
             - ScanTokens scans a string and returns a slice of tokens.
