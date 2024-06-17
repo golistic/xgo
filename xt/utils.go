@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const EnvNoColors = "XT_NO_COLORS"
+
 var TestHelper = (*testing.T).Helper
 
 func fatal(t *testing.T, out io.Writer, mainMsg string, messages ...string) {
