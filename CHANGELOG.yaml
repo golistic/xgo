@@ -4,6 +4,13 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.11.0
+        date: 2024-06-17
+        added:
+          xt:
+            - Add `xt.ErrorIs()` to check a wrapped error. Also add the possibility to turn of
+              colors in output of xt using the environmental variable `XT_NO_COLORS`. This is
+              mostly to make testing easier, but can useful in other situations as well.
       - version: v1.10.0
         date: 2024-04-26
         added:
