@@ -4,6 +4,7 @@ package xos
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -69,6 +70,11 @@ func TestAllFilenamesInDir(t *testing.T) {
 
 	have, err := AllFilenamesInDir(dir)
 	xt.OK(t, err)
+
+	script := dir + "/create_sym_link.sh"
+	xt.OK(t, os.Chmod(script, 0700))
+	cmd := exec.Command(dir + "/create_sym_link.sh")
+	xt.OK(t, cmd.Run())
 
 	exp := []string{
 		".gitignore",

@@ -69,6 +69,7 @@ func FilesInDir(path string) ([]string, error) {
 	}
 
 	sort.Strings(l)
+
 	return l, nil
 }
 
@@ -76,6 +77,7 @@ func FilesInDir(path string) ([]string, error) {
 // found in directory path.
 // The result is alphabetically sorted.
 func AllFilenamesInDir(root string) ([]string, error) {
+
 	var result []string
 
 	err := filepath.WalkDir(root, func(path string, info fs.DirEntry, err error) error {
