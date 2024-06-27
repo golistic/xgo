@@ -58,6 +58,8 @@ func ko(t *testing.T, out io.Writer, err error, messages ...string) {
 	}
 }
 
+// ErrorIs checks whether the provided errors are the same when not wrapping or whether
+// the have-error is wrapped in the have-error.
 func ErrorIs(t *testing.T, want, have error, messages ...string) {
 
 	TestHelper(t)
@@ -65,9 +67,35 @@ func ErrorIs(t *testing.T, want, have error, messages ...string) {
 	errorIs(t, nil, want, have, messages...)
 }
 
-func errorIs(t *testing.T, out io.Writer, want, have error, messages ...string) bool {
+func errorIs(t *testing.T, out io.Writer, want, have error, messages ...string) {
 
 	TestHelper(t)
+
+	if errors.Unwrap(want) == nil && errors.Unwrap(have) == nil {
+
+		var msg string
+
+		switch {
+		case want == nil && have == nil:
+			return
+		case want != nil && have != nil && want.Error() == have.Error():
+			return
+		}
+
+		msg = fmt.Sprintf("\u001B[31;1m\nwant error: %v\nhave error: %v\u001B[0m", want, have)
+
+		if _, ok := os.LookupEnv(EnvNoColors); ok {
+			msg = fmt.Sprintf("\nwant error: %v\nhave error: %v", want, have)
+		}
+
+		if len(messages) > 0 {
+			messages = append([]string{"--"}, messages...)
+		}
+
+		fatal(t, out, msg, messages...)
+
+		return
+	}
 
 	if !errors.Is(have, want) {
 		diff := fmt.Sprintf("\n\u001b[31;1mwant error:\t\u001b[0m%v\n\u001b[31;1mwrapped in:\t\u001b[0m%v\n", want, have)
@@ -79,9 +107,9 @@ func errorIs(t *testing.T, out io.Writer, want, have error, messages ...string) 
 		if len(messages) > 0 {
 			messages = append([]string{"--"}, messages...)
 		}
-		fatal(t, out, diff, messages...)
-		return false
-	}
 
-	return true
+		fatal(t, out, diff, messages...)
+
+		return
+	}
 }
