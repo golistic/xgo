@@ -47,36 +47,64 @@ func TestKO(t *testing.T) {
 func TestErrorIs(t *testing.T) {
 	t.Run("non-wrapped error does not match", func(t *testing.T) {
 		out := bytes.NewBuffer(nil)
-		wantErr := fmt.Errorf("I am error")
-		gotErr := fmt.Errorf("actual error")
+		want := fmt.Errorf("I am error")
+		have := fmt.Errorf("actual error")
 
-		errorIs(t, out, wantErr, gotErr)
+		errorIs(t, out, want, have)
 
 		wantOutput := `
-want error:	I am error
-wrapped in:	actual error
-`
+want error: I am error
+have error: actual error`
+
 		if wantOutput != out.String() {
-			t.Fatal("want:", wantOutput, out.String())
+			t.Fatal("\nwant:", wantOutput, want, "\nhave:", out.String())
 		}
 	})
 
 	t.Run("wrapped error does match", func(t *testing.T) {
 		out := bytes.NewBuffer(nil)
-		wantErr := fmt.Errorf("I am error")
-		haveError := fmt.Errorf("actual error: %w", wantErr)
+		want := fmt.Errorf("I am error")
+		have := fmt.Errorf("actual error: %w", want)
 
-		if !errorIs(t, out, wantErr, haveError) {
+		errorIs(t, out, want, have)
+
+		if out.String() != "" {
 			t.Fatal("expected success", "have:", out.String())
 		}
 	})
 
 	t.Run("not wrapped error does match", func(t *testing.T) {
 		out := bytes.NewBuffer(nil)
-		wantErr := fmt.Errorf("I am error")
-		haveError := wantErr
+		want := fmt.Errorf("I am error")
+		have := fmt.Errorf("I am error")
 
-		if !errorIs(t, out, wantErr, haveError) {
+		errorIs(t, out, want, have)
+
+		if out.String() != "" {
+			t.Fatal("expected success", "have:", out.String())
+		}
+	})
+
+	t.Run("want but have is nil", func(t *testing.T) {
+		out := bytes.NewBuffer(nil)
+		want := fmt.Errorf("I am error")
+		var have error
+
+		errorIs(t, out, want, have)
+
+		if out.String() != "\nwant error: I am error\nhave error: <nil>" {
+			t.Fatal("expected success", "have:", out.String())
+		}
+	})
+
+	t.Run("want is null but have not", func(t *testing.T) {
+		out := bytes.NewBuffer(nil)
+		var want error
+		have := fmt.Errorf("I am error")
+
+		errorIs(t, out, want, have)
+
+		if out.String() != "\nwant error: <nil>\nhave error: I am error" {
 			t.Fatal("expected success", "have:", out.String())
 		}
 	})
