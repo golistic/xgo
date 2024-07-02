@@ -4,6 +4,15 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.13.0
+        date: 2024-07-02
+        added:
+          xtime:
+            - `xtime.FirstBeforeSecond` returns true if the first time is before the second time. If either of
+              the times is nil or zero value, it returns true.
+        fixed:
+          xt:
+            - We change ErrorIs so that it also can deal with non-wrapped errors.
       - version: v1.12.0
         date: 2024-06-25
         added:
