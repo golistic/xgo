@@ -5,6 +5,7 @@
 package xslice
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/golistic/xgo/xt"
@@ -81,4 +82,41 @@ func TestRemoveFirstN(t *testing.T) {
 			xt.Eq(t, tt.want, RemoveFirstN(tt.have, tt.n))
 		})
 	}
+}
+
+func TestExclude(t *testing.T) {
+	fInt := func(s []int, toExclude []int, want []int) {
+		var have []int
+		Exclude(s, toExclude)(func(i int) bool {
+			have = append(have, i)
+			return true
+		})
+		xt.Assert(t, slices.Equal(want, have))
+	}
+
+	fString := func(s []string, toExclude []string, want []string) {
+		var have []string
+
+		for el := range Exclude(s, toExclude) {
+			have = append(have, el)
+		}
+
+		xt.Assert(t, slices.Equal(want, have))
+	}
+
+	// empty slice
+	fInt([]int{}, []int{1, 2}, []int{})
+	fString([]string{}, []string{"a", "b"}, []string{})
+
+	// empty toExclude
+	fInt([]int{1, 2, 3}, []int{}, []int{1, 2, 3})
+	fString([]string{"a", "b", "c"}, []string{}, []string{"a", "b", "c"})
+
+	// exclude some
+	fInt([]int{1, 2, 3, 4, 5}, []int{2, 4}, []int{1, 3, 5})
+	fString([]string{"a", "b", "c", "d", "e"}, []string{"b", "d"}, []string{"a", "c", "e"})
+
+	// exclude all
+	fInt([]int{1, 2, 3, 4, 5}, []int{1, 2, 3, 4, 5}, []int{})
+	fString([]string{"a", "b", "c", "d", "e"}, []string{"a", "b", "c", "d", "e"}, []string{})
 }

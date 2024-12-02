@@ -4,6 +4,10 @@
 
 package xslice
 
+import (
+	"iter"
+)
+
 // RemoveFirst removes the first element from the given slice and returns the resulting slice.
 // If the slice is empty, it returns an empty slice.
 func RemoveFirst[S ~[]E, E any](s S) []E {
@@ -24,4 +28,24 @@ func RemoveFirstN[S ~[]E, E any](s S, n int) []E {
 	}
 
 	return s[n:]
+}
+
+// Exclude returns an iterator that yields the slice elements in order,
+// excluding the elements in toExclude.
+func Exclude[S ~[]E, E comparable](s S, toExclude []E) iter.Seq[E] {
+
+	excludeSet := make(map[E]struct{}, len(toExclude))
+	for _, item := range toExclude {
+		excludeSet[item] = struct{}{}
+	}
+
+	return func(yield func(E) bool) {
+		for _, item := range s {
+			if _, found := excludeSet[item]; !found {
+				if !yield(item) {
+					return
+				}
+			}
+		}
+	}
 }
