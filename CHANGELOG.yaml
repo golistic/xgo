@@ -4,6 +4,13 @@ xgo:
       description: |
         Extra Go functionality organized like the Go's standard library.
   - versions:
+      - version: v1.14.0
+        date: 2024-12-02
+        added:
+          xslice:
+            - add Exclude
+        build:
+          - upgrade to Go 1.23 and update direct dependencies
       - version: v1.13.0
         date: 2024-07-02
         added:
