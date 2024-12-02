@@ -14,6 +14,8 @@ The package grew from an old package, which was split into various separate
 repositories within github.com/golistic. However, this is way too much overhead and
 maintenance, so we decided to revert back to a single repository: `xgo`.
 
+Requires Go 1.23 or later.
+
 Index
 -----
 
