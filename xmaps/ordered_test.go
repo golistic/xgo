@@ -3,6 +3,8 @@
 package xmaps
 
 import (
+	"encoding/json"
+	"errors"
 	"testing"
 
 	"github.com/golistic/xgo/xt"
@@ -141,5 +143,41 @@ func TestOrderedMap(t *testing.T) {
 		om.Set("1", 1.1)
 		om.Set("2", 2)
 		xt.Eq(t, true, om.Has("2"))
+	})
+
+	t.Run("decoded from JSON", func(t *testing.T) {
+		want := NewOrderedMap[string]()
+		want.Set("key3", "value")
+		want.Set("key1", 1.1)
+		want.Set("key2", 2)
+
+		for range 100 {
+			// run a few times to test if it is idempotent
+			wantJson, err := want.MarshalJSON()
+			xt.OK(t, err)
+
+			have := NewOrderedMap[string]()
+
+			xt.OK(t, have.UnmarshalJSON(wantJson))
+
+			haveJson, err := have.MarshalJSON()
+			xt.OK(t, err)
+			xt.Eq(t, wantJson, haveJson)
+		}
+	})
+
+	t.Run("encoded to JSON keys must be strings", func(t *testing.T) {
+		om := NewOrderedMap[int]()
+		om.Set(1, "value")
+		_, err := om.MarshalJSON()
+		xt.ErrorIs(t, err, ErrKeysMustBeStrings)
+	})
+
+	t.Run("decoded from JSON errors with invalid keys", func(t *testing.T) {
+		om := NewOrderedMap[int]()
+		err := om.UnmarshalJSON([]byte(`{1:"value"}`))
+		xt.KO(t, err)
+		var syntaxErr *json.SyntaxError
+		xt.Assert(t, errors.As(err, &syntaxErr))
 	})
 }

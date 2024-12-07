@@ -2,7 +2,20 @@
 
 package xmaps
 
-import "slices"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"slices"
+	"strings"
+)
+
+var ErrKeysMustBeStrings = fmt.Errorf("keys must be strings")
+
+func NewOrderedMap[T comparable]() *OrderedMap[T] {
+
+	return &OrderedMap[T]{}
+}
 
 // OrderedMap wraps around a Go map keeping the order with which
 // elements have been added. Keys must be comparable, but values
@@ -17,6 +30,12 @@ type OrderedMap[T comparable] struct {
 	order []T
 }
 
+func (om *OrderedMap[T]) init() {
+
+	om.pairs = map[T]any{}
+	om.order = []T{}
+}
+
 // Count returns the number of elements in the map.
 func (om *OrderedMap[T]) Count() int {
 	return len(om.order)
@@ -27,7 +46,7 @@ func (om *OrderedMap[T]) Count() int {
 func (om *OrderedMap[T]) Set(key T, value any) {
 
 	if om.pairs == nil {
-		om.pairs = map[T]any{}
+		om.init()
 	}
 
 	om.pairs[key] = value
@@ -97,4 +116,72 @@ func (om *OrderedMap[T]) has(key T) bool {
 func (om *OrderedMap[T]) Value(key T) (any, bool) {
 
 	return om.pairs[key], om.has(key)
+}
+
+func (om *OrderedMap[T]) MarshalJSON() ([]byte, error) {
+
+	if om.pairs == nil {
+		return []byte("null"), nil
+	}
+
+	if _, ok := any(om.order[0]).(string); !ok {
+		return nil, ErrKeysMustBeStrings
+	}
+
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+	for i, key := range om.order {
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		keyJSON, err := json.Marshal(key)
+		if err != nil {
+			return nil, err
+		}
+		valueJSON, err := json.Marshal(om.pairs[key])
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(keyJSON)
+		buf.WriteByte(':')
+		buf.Write(valueJSON)
+	}
+	buf.WriteByte('}')
+
+	return buf.Bytes(), nil
+}
+
+func (om *OrderedMap[T]) UnmarshalJSON(data []byte) error {
+
+	decoder := json.NewDecoder(strings.NewReader(string(data)))
+	omTmp := NewOrderedMap[T]()
+
+	// opening brace
+	if _, err := decoder.Token(); err != nil {
+		return err
+	}
+
+	// key-value pairs (object)
+	for decoder.More() {
+		t, err := decoder.Token()
+		if err != nil {
+			return err
+		}
+
+		var value any
+		if err := decoder.Decode(&value); err != nil {
+			return err
+		}
+
+		omTmp.Set(t.(T), value)
+	}
+
+	// closing brace
+	if _, err := decoder.Token(); err != nil {
+		return err
+	}
+
+	*om = *omTmp
+
+	return nil
 }
