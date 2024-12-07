@@ -13,7 +13,7 @@ import (
 func TestOrderedMap(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 
-		om := OrderedMap[string]{}
+		om := OrderedMap[string, any]{}
 		xt.Eq(t, 0, om.Count())
 		xt.Eq(t, 0, len(om.Keys()))
 		xt.Eq(t, 0, len(om.Values()))
@@ -25,7 +25,7 @@ func TestOrderedMap(t *testing.T) {
 
 	t.Run("retrieve keys and values", func(t *testing.T) {
 
-		om := OrderedMap[string]{}
+		om := OrderedMap[string, any]{}
 		om.Set("key3", "value3")
 		om.Set("key1", 1.1)
 		om.Set("key2", 2)
@@ -43,7 +43,7 @@ func TestOrderedMap(t *testing.T) {
 
 	t.Run("set already set does not change order", func(t *testing.T) {
 
-		om := OrderedMap[string]{}
+		om := OrderedMap[string, any]{}
 		om.Set("key3", "value3")
 		om.Set("key1", 1.1)
 		om.Set("key2", 2)
@@ -61,7 +61,7 @@ func TestOrderedMap(t *testing.T) {
 
 	t.Run("retrieve key", func(t *testing.T) {
 
-		om := OrderedMap[string]{}
+		om := OrderedMap[string, any]{}
 		om.Set("key3", "value3")
 		om.Set("key1", 1.1)
 		om.Set("key2", 2)
@@ -89,7 +89,7 @@ func TestOrderedMap(t *testing.T) {
 
 	t.Run("delete element", func(t *testing.T) {
 
-		om := OrderedMap[string]{}
+		om := OrderedMap[string, any]{}
 		om.Set("key3", "value3")
 		om.Set("key1", 1.1)
 		om.Set("key2", 2)
@@ -118,7 +118,7 @@ func TestOrderedMap(t *testing.T) {
 
 	t.Run("map[int] retrieve keys and values", func(t *testing.T) {
 
-		om := OrderedMap[int]{}
+		om := OrderedMap[int, any]{}
 		om.Set(3, "value3")
 		om.Set(1, 1.1)
 		om.Set(2, 2)
@@ -138,7 +138,7 @@ func TestOrderedMap(t *testing.T) {
 
 		type foo string
 
-		om := OrderedMap[foo]{}
+		om := OrderedMap[foo, any]{}
 		om.Set("3", "value3")
 		om.Set("1", 1.1)
 		om.Set("2", 2)
@@ -146,7 +146,7 @@ func TestOrderedMap(t *testing.T) {
 	})
 
 	t.Run("decoded from JSON", func(t *testing.T) {
-		want := NewOrderedMap[string]()
+		want := NewOrderedMap[string, any]()
 		want.Set("key3", "value")
 		want.Set("key1", 1.1)
 		want.Set("key2", 2)
@@ -156,7 +156,7 @@ func TestOrderedMap(t *testing.T) {
 			wantJson, err := want.MarshalJSON()
 			xt.OK(t, err)
 
-			have := NewOrderedMap[string]()
+			have := NewOrderedMap[string, any]()
 
 			xt.OK(t, have.UnmarshalJSON(wantJson))
 
@@ -167,14 +167,14 @@ func TestOrderedMap(t *testing.T) {
 	})
 
 	t.Run("encoded to JSON keys must be strings", func(t *testing.T) {
-		om := NewOrderedMap[int]()
+		om := NewOrderedMap[int, any]()
 		om.Set(1, "value")
 		_, err := om.MarshalJSON()
 		xt.ErrorIs(t, err, ErrKeysMustBeStrings)
 	})
 
 	t.Run("decoded from JSON errors with invalid keys", func(t *testing.T) {
-		om := NewOrderedMap[int]()
+		om := NewOrderedMap[int, any]()
 		err := om.UnmarshalJSON([]byte(`{1:"value"}`))
 		xt.KO(t, err)
 		var syntaxErr *json.SyntaxError
