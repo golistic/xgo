@@ -1,7 +1,7 @@
 xgo - Extra Go
 ==============
 
-Copyright (c) 2020, 2023, Geert JM Vanderkelen
+Copyright (c) 2020, 2024, Geert JM Vanderkelen
 
 Package `xgo` gathers extra, common functionality which gets reimplemented
 in each project. It is organized in sub-packages which mimic the Go standard
@@ -24,6 +24,7 @@ counterparts in the Go standard library, for example, `xos` and `os`. However, w
 add some more like `xconv` and `xptr`.
 
 * `xconv` - (basic) type conversions similar 
+* `xmaps` - extra functionality manipulating Go maps
 * `xnet` - from validating email addresses to finding te next free TCP port
 * `xos` - wrapping around `os` with functions like `IsDir` or `IsRegularFile` and mapping environment
 * `xptr` - getting pointer to value; probably the most reimplemented functionality 
