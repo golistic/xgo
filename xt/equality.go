@@ -9,45 +9,44 @@ import (
 	"testing"
 )
 
-// Eq checks whether the expected value is equal to what we have.
-// Messages are printed after
-func Eq(t *testing.T, expect, have any, messages ...string) {
+// Eq checks if the `want` value is equal to the `have` value during testing.
+// If not equal, it triggers a test failure with optional custom `messages`.
+//
+// This function uses reflection for comparison and handles nil values.
+func Eq(t *testing.T, want, have any, messages ...string) {
+
 	TestHelper(t)
-	eq(t, nil, expect, have, messages...)
+	eq(t, nil, want, have, messages...)
 }
 
-func eq(t *testing.T, out io.Writer, expect, have any, messages ...string) {
+func eq(t *testing.T, out io.Writer, want, have any, messages ...string) {
 
 	TestHelper(t)
-	diff := fmt.Sprintf("\n\u001b[31;1mexpect:\t\u001b[0m%v\n\u001b[31;1mhave:\t\u001b[0m%v", expect, have)
+	diff := fmt.Sprintf("\n\u001b[31;1mexpect:\t\u001b[0m%v\n\u001b[31;1mhave:\t\u001b[0m%v", want, have)
 
-	if isNil(expect) || isNil(have) {
-		if !(isNil(expect) && isNil(have)) {
+	if isNil(want) || isNil(have) {
+		if !(isNil(want) && isNil(have)) {
 			fatal(t, out, diff, messages...)
 		}
 		return
 	}
 
-	expVal := reflect.ValueOf(expect)
-	haveType := reflect.TypeOf(have)
+	expVal := reflect.ValueOf(want)
+	haveVal := reflect.ValueOf(have)
 
-	if !expVal.Type().ConvertibleTo(haveType) {
+	if expVal.Type().ConvertibleTo(haveVal.Type()) {
+		defer func() {
+			if r := recover(); r != nil {
+				fatal(t, out, fmt.Sprintf("\u001b[31;1mcannot compare %T with %T\u001b[0m", want, have))
+			}
+		}()
 
-	}
-
-	defer func() {
-		r := recover()
-		if r != nil {
-			fatal(t, out, fmt.Sprintf("\u001b[31;1mcannot compare %T with %T\u001b[0m",
-				expect, have))
+		// Convert and compare
+		expConverted := expVal.Convert(haveVal.Type()).Interface()
+		if !reflect.DeepEqual(expConverted, have) {
+			fatal(t, out, diff, messages...)
 		}
-	}()
-
-	expAny := func() any {
-		return expVal.Convert(haveType).Interface()
-	}()
-
-	if !reflect.DeepEqual(expAny, have) {
-		fatal(t, out, diff, messages...)
+	} else {
+		fatal(t, out, fmt.Sprintf("\u001b[31;1mcannot convert %T to %T\u001b[0m", want, have), messages...)
 	}
 }

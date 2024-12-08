@@ -57,7 +57,7 @@ func TestEq(t *testing.T) {
 		v := 5
 		eq(t, have, []int{1, 2, 3}, &v)
 		fmt.Println(have.String())
-		exp := []byte("\u001B[31;1mcannot compare []int with *int\u001B[0m")
+		exp := []byte("\u001B[31;1mcannot convert []int to *int\u001B[0m")
 		if !bytes.Equal(exp, have.Bytes()) {
 			t.Fatal("expected:", string(exp), have.String())
 		}
