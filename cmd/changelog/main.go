@@ -17,11 +17,12 @@ import (
 	"time"
 )
 
-var reConventionalCommit = regexp.MustCompile(`^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(([a-zA-Z0-9_-]+)\)?: (.*)$`)
+var reConventionalCommit = regexp.MustCompile(`^(feat|fix|hotfix|docs|style|refactor|perf|test|build|ci|chore|revert)\(([a-zA-Z0-9_-]+)\)?: (.*)$`)
 
 var conventionalMapping = map[string]string{
 	"feat":     "Added",
 	"fix":      "Fixed",
+	"hotfix":   "Fixed",
 	"docs":     "Changed",
 	"style":    "Changed",
 	"refactor": "Changed",
