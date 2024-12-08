@@ -113,7 +113,7 @@ func (om *OrderedMap[K, V]) has(key K) bool {
 
 // Value returns the value for key and also whether it was found.
 // The bool is returned because value could be nil.
-func (om *OrderedMap[K, V]) Value(key K) (any, bool) {
+func (om *OrderedMap[K, V]) Value(key K) (V, bool) {
 
 	return om.pairs[key], om.has(key)
 }
@@ -177,7 +177,6 @@ func (om *OrderedMap[K, V]) UnmarshalJSON(data []byte) error {
 		if err := decoder.Decode(&value); err != nil {
 			return err
 		}
-		fmt.Println("### value", value)
 
 		omTmp.Set(keyToken.(K), value)
 	}
