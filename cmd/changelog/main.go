@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-var reConventionalCommit = regexp.MustCompile(`^(feat|fix|hotfix|docs|style|refactor|perf|test|build|ci|chore|revert)\(([a-zA-Z0-9_-]+)\)?: (.*)$`)
+var reConventionalCommit = regexp.MustCompile(`^(feat|fix|hotfix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?: (.*)$`)
 
 var conventionalMapping = map[string]string{
 	"feat":     "Added",
@@ -66,25 +66,33 @@ func getCommitsSinceLastTag(tag string) ([]string, error) {
 	return commits, nil
 }
 
+type changelogEntry struct {
+	scope   string
+	message string
+}
+
 type changelogSection struct {
 	name    string
-	entries map[string][]string
+	entries map[string][]changelogEntry
 }
 
 func newChangelogSection(name string) *changelogSection {
 	return &changelogSection{
 		name:    name,
-		entries: make(map[string][]string),
+		entries: make(map[string][]changelogEntry),
 	}
 }
 
-func (s *changelogSection) addEntry(commitType, commitMessage string) {
+func (s *changelogSection) addEntry(name, message string) {
 
 	if s.entries == nil {
-		s.entries = make(map[string][]string)
+		s.entries = make(map[string][]changelogEntry)
 	}
 
-	s.entries[commitType] = append(s.entries[commitType], commitMessage)
+	s.entries[name] = append(s.entries[name], changelogEntry{
+		scope:   name,
+		message: message,
+	})
 }
 
 // generateChangelog processes a list of commit messages and organizes them into categorized changelog sections.
@@ -95,14 +103,25 @@ func generateChangelog(tag string, commits []string) string {
 	sections := map[string]*changelogSection{}
 
 	for _, commit := range commits {
+
 		matches := reConventionalCommit.FindStringSubmatch(commit)
 		if matches == nil {
 			continue
 		}
 
 		commitType := matches[1]
-		commitScope := matches[2]
-		commitMessage := strings.TrimSpace(matches[3])
+		commitScope := ""
+		commitMessage := ""
+
+		switch len(matches) {
+		case 4:
+			commitScope = strings.Trim(matches[2], "()")
+			commitMessage = matches[3]
+		case 3:
+			commitMessage = strings.TrimSpace(matches[2])
+		default:
+			continue
+		}
 
 		if header, exists := conventionalMapping[commitType]; exists {
 
@@ -134,13 +153,19 @@ func generateChangelog(tag string, commits []string) string {
 				continue
 			}
 
-			if len(entries) == 1 {
-				changelog.WriteString(fmt.Sprintf("- **%s**: %s\n", scope, entries[0]))
-			} else {
-				slices.Reverse(entries)
-				changelog.WriteString(fmt.Sprintf("- **%s**:\n", scope))
+			if scope == "" {
 				for _, entry := range entries {
-					changelog.WriteString(fmt.Sprintf("    - %s\n", entry))
+					changelog.WriteString(fmt.Sprintf("- %s\n", entry.message))
+				}
+			} else {
+				if len(entries) == 1 {
+					changelog.WriteString(fmt.Sprintf("- **%s**: %s\n", scope, entries[0].message))
+				} else {
+					slices.Reverse(entries)
+					changelog.WriteString(fmt.Sprintf("- **%s**:\n", scope))
+					for _, entry := range entries {
+						changelog.WriteString(fmt.Sprintf("    - %s\n", entry.message))
+					}
 				}
 			}
 		}
