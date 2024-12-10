@@ -5,12 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+## [1.15.2] - 2024-12-10
+
+### Fixed
+
+- **cmd**: support unscoped commits generating changelog
+
 ## [1.15.1] - 2024-12-08
 
 ### Fixed
 
 - **xmaps**: Value method now returns correctly V instead of any
-
 
 ## [1.15.0] - 2024-12-08
 
