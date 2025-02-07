@@ -89,6 +89,12 @@ func (s *changelogSection) addEntry(name, message string) {
 		s.entries = make(map[string][]changelogEntry)
 	}
 
+	if slices.ContainsFunc(s.entries[name], func(e changelogEntry) bool {
+		return strings.Contains(e.message, message)
+	}) {
+		return
+	}
+
 	s.entries[name] = append(s.entries[name], changelogEntry{
 		scope:   name,
 		message: message,
