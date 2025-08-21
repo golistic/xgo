@@ -102,7 +102,7 @@ func (s *changelogSection) addEntry(name, message string) {
 }
 
 // generateChangelog processes a list of commit messages and organizes them into categorized changelog sections.
-func generateChangelog(tag string, commits []string) string {
+func generateChangelog(tag string, commits []string, skipTypes []string, skipScopes []string) string {
 
 	var changelog strings.Builder
 
@@ -116,6 +116,11 @@ func generateChangelog(tag string, commits []string) string {
 		}
 
 		commitType := matches[1]
+
+		if slices.Contains(skipTypes, commitType) {
+			continue
+		}
+
 		commitScope := ""
 		commitMessage := ""
 
@@ -155,6 +160,10 @@ func generateChangelog(tag string, commits []string) string {
 
 		for scope, entries := range section.entries {
 
+			if slices.Contains(skipScopes, scope) {
+				continue
+			}
+
 			if len(entries) == 0 {
 				continue
 			}
@@ -182,9 +191,10 @@ func generateChangelog(tag string, commits []string) string {
 	return changelog.String()
 }
 
-// nextMinorVersion calculates the next minor version based on a given semantic version tag.
-// The function expects a version tag in the format 'vMAJOR.MINOR.PATCH' and returns the incremented minor version.
-func nextMinorVersion(tag string, hotfix bool) (string, error) {
+// nextVersion calculates the next version based on a given semantic version tag.
+// The function expects a version tag in the format 'vMAJOR.MINOR.PATCH' and returns the incremented version.
+// The hotfix flag indicates whether the version should be incremented as a PATCH version or a MINOR version.
+func nextVersion(tag string, hotfix bool) (string, error) {
 
 	tag = strings.TrimPrefix(tag, "v")
 
@@ -221,7 +231,19 @@ func nextMinorVersion(tag string, hotfix bool) (string, error) {
 
 func main() {
 	hotfix := flag.Bool("hotfix", false, "Calculate the next PATCH version instead of MINOR")
+	flagSkipTypes := flag.String("skip-types", "", "Comma-separated list of types (feat, fix, etc.) to skip")
+	flagSkipScopes := flag.String("skip-scopes", "", "Comma-separated list of scopes to skip")
 	flag.Parse()
+
+	var skipTypes []string
+	if flagSkipTypes != nil && *flagSkipTypes != "" {
+		skipTypes = strings.Split(*flagSkipTypes, ",")
+	}
+
+	var skipScopes []string
+	if flagSkipScopes != nil && *flagSkipScopes != "" {
+		skipScopes = strings.Split(*flagSkipScopes, ",")
+	}
 
 	latestTag, err := getLatestTag()
 	if err != nil {
@@ -229,7 +251,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	nextTag, err := nextMinorVersion(latestTag, *hotfix)
+	nextTag, err := nextVersion(latestTag, *hotfix)
 	if err != nil {
 		fmt.Println("Error generating next minor version:", err)
 	}
@@ -242,7 +264,7 @@ func main() {
 	}
 
 	// Generate changelog entry
-	changelogEntry := generateChangelog(nextTag, commits)
+	changelogEntry := generateChangelog(nextTag, commits, skipTypes, skipScopes)
 
 	// Print or save the changelog
 	fmt.Print("\n", changelogEntry)
