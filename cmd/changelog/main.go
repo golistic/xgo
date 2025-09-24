@@ -231,6 +231,7 @@ func nextVersion(tag string, hotfix bool) (string, error) {
 
 func main() {
 	hotfix := flag.Bool("hotfix", false, "Calculate the next PATCH version instead of MINOR")
+	tagOnly := flag.Bool("tag-only", false, "Only show the tag/version instead of the full changelog")
 	flagSkipTypes := flag.String("skip-types", "", "Comma-separated list of types (feat, fix, etc.) to skip")
 	flagSkipScopes := flag.String("skip-scopes", "", "Comma-separated list of scopes to skip")
 	flag.Parse()
@@ -254,6 +255,12 @@ func main() {
 	nextTag, err := nextVersion(latestTag, *hotfix)
 	if err != nil {
 		fmt.Println("Error generating next minor version:", err)
+	}
+
+	// If tag-only flag is set, just print the tag and exit
+	if *tagOnly {
+		fmt.Println(nextTag)
+		return
 	}
 
 	// Get commits since the last tag
