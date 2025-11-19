@@ -32,11 +32,16 @@ var conventionalMapping = map[string]string{
 
 var sectionOrder = []string{"Added", "Changed", "Fixed"}
 
-// getLatestTag retrieves the most recent Git tag in the current repository.
-// It returns the latest tag as a string.
-func getLatestTag() (string, error) {
+// getLatestTag retrieves the most recent Git tag reachable from the given branch.
+// If branch is empty, it uses "main" by default. It returns the latest tag as a string.
+func getLatestTag(branch string) (string, error) {
 
-	cmd := exec.Command("git", "describe", "--tags", "--abbrev=0")
+	if strings.TrimSpace(branch) == "" {
+		branch = "main"
+	}
+
+	// ask git to describe the most recent tag reachable from the specified branch
+	cmd := exec.Command("git", "describe", "--tags", "--abbrev=0", branch)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
@@ -234,6 +239,10 @@ func main() {
 	tagOnly := flag.Bool("tag-only", false, "Only show the tag/version instead of the full changelog")
 	flagSkipTypes := flag.String("skip-types", "", "Comma-separated list of types (feat, fix, etc.) to skip")
 	flagSkipScopes := flag.String("skip-scopes", "", "Comma-separated list of scopes to skip")
+
+	var tagBranch string
+	flag.StringVar(&tagBranch, "tag-branch", "main", "Branch to search for the latest tag (default: main)")
+
 	flag.Parse()
 
 	var skipTypes []string
@@ -246,7 +255,7 @@ func main() {
 		skipScopes = strings.Split(*flagSkipScopes, ",")
 	}
 
-	latestTag, err := getLatestTag()
+	latestTag, err := getLatestTag(tagBranch)
 	if err != nil {
 		fmt.Println("Error fetching latest tag:", err)
 		os.Exit(1)
