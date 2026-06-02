@@ -28,6 +28,7 @@ var conventionalMapping = map[string]string{
 	"refactor": "Changed",
 	"perf":     "Changed",
 	"build":    "Changed",
+	"chore":    "Changed",
 }
 
 var sectionOrder = []string{"Added", "Changed", "Fixed"}
@@ -301,5 +302,6 @@ func GenerateChangelog(tagBranch string, hotfix bool, skipTypes []string, skipSc
 	}
 
 	entry := RenderChangelog(nextTag, commits, skipTypes, skipScopes)
+
 	return entry, nil
 }
