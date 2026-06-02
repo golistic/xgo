@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+## [1.17.0] - 2026-06-02
+
+### Added
+
+- **git**: map chore commits to Changed section
+
+### Changed
+
+- mark `xptr.Of` as deprecated in favor of Go 1.26's `new` function
+- replace `xptr.Of` usage with `new` across the codebase
+- **deps**: update dependencies and bump Go version to 1.26.0
+
+### Fixed
+
+- correct error formatting in `xjson/format_test.go` and `xgrpc/errors.go`
+
 ## [1.16.0] - 2025-11-19
 
 ### Added
