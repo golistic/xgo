@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golistic/xgo/xptr"
 	"github.com/golistic/xgo/xt"
 )
 
@@ -30,9 +29,9 @@ func TestOf(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("%T", c), func(t *testing.T) {
-			got := xptr.Of(c)
+			got := new(c)
 			xt.Eq(t, reflect.Pointer, reflect.ValueOf(got).Kind())
-			xt.Assert(t, c == *xptr.Of(c))
+			xt.Assert(t, c == *new(c))
 		})
 	}
 }

@@ -54,8 +54,7 @@ func TestEq(t *testing.T) {
 
 	t.Run("not ConvertibleTo", func(t *testing.T) {
 		have := bytes.NewBuffer(nil)
-		v := 5
-		eq(t, have, []int{1, 2, 3}, &v)
+		eq(t, have, []int{1, 2, 3}, new(5))
 		fmt.Println(have.String())
 		exp := []byte("\u001B[31;1mcannot convert []int to *int\u001B[0m")
 		if !bytes.Equal(exp, have.Bytes()) {

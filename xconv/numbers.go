@@ -30,17 +30,13 @@ func UnsignedAsUint64Ptr(n any) *uint64 {
 	case *uint64:
 		return v
 	case *uint:
-		tmp := uint64(*v)
-		return &tmp
+		return new(uint64(*v))
 	case *uint8:
-		tmp := uint64(*v)
-		return &tmp
+		return new(uint64(*v))
 	case *uint16:
-		tmp := uint64(*v)
-		return &tmp
+		return new(uint64(*v))
 	case *uint32:
-		tmp := uint64(*v)
-		return &tmp
+		return new(uint64(*v))
 	default:
 		panic(fmt.Sprintf("n must be pointer to one of uint64, uint, uint8, uint16, or uint32; not '%T'", n))
 	}
@@ -72,17 +68,13 @@ func SignedAsInt64Ptr(n any) *int64 {
 	case *int64:
 		return v
 	case *int:
-		tmp := int64(*v)
-		return &tmp
+		return new(int64(*v))
 	case *int8:
-		tmp := int64(*v)
-		return &tmp
+		return new(int64(*v))
 	case *int16:
-		tmp := int64(*v)
-		return &tmp
+		return new(int64(*v))
 	case *int32:
-		tmp := int64(*v)
-		return &tmp
+		return new(int64(*v))
 	default:
 		panic(fmt.Sprintf("n must be pointer to one of int64, int, int8, int16, int32; not %T", n))
 	}

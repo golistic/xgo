@@ -26,7 +26,7 @@ func TestValueOr(t *testing.T) {
 			},
 			{
 				name:     "Non-nil pointer",
-				a:        Of(2),
+				a:        new(2),
 				b:        3,
 				expected: 2,
 			},
@@ -55,7 +55,7 @@ func TestValueOr(t *testing.T) {
 			},
 			{
 				name:     "Non-nil pointer",
-				a:        Of(true),
+				a:        new(true),
 				b:        false,
 				expected: true,
 			},

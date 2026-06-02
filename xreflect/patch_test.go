@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golistic/xgo/xptr"
 	"github.com/golistic/xgo/xreflect"
 	"github.com/golistic/xgo/xt"
 )
@@ -21,7 +20,7 @@ func TestPatchStruct(t *testing.T) {
 			FieldPtrInt *int
 		}
 
-		patcher := &targetType{FieldInt: 23, FieldPtrInt: xptr.Of(2383)}
+		patcher := &targetType{FieldInt: 23, FieldPtrInt: new(2383)}
 
 		t.Run("patch int", func(t *testing.T) {
 			target := &targetType{}
@@ -62,8 +61,8 @@ func TestPatchStruct(t *testing.T) {
 		expInt := 5
 		exptTime := time.Now()
 		patcher := &patcherType{
-			FieldInt:  xptr.Of(expInt),
-			FieldTime: xptr.Of(exptTime),
+			FieldInt:  new(expInt),
+			FieldTime: new(exptTime),
 		}
 
 		patched, err := xreflect.PatchStruct(target, patcher)
@@ -114,7 +113,7 @@ func TestPatchStruct(t *testing.T) {
 
 		patcher := &patcherType{
 			FieldInt:    112,
-			FieldPtrInt: xptr.Of(889),
+			FieldPtrInt: new(889),
 		}
 
 		patched, err := xreflect.PatchStruct(target, patcher)
@@ -135,7 +134,7 @@ func TestPatchStruct(t *testing.T) {
 			FieldPtr *string
 		}
 
-		exp := xptr.Of("pointer")
+		exp := new("pointer")
 		patcher := &patcherType{FieldPtr: exp}
 
 		patched, err := xreflect.PatchStruct(target, patcher)
@@ -178,7 +177,7 @@ func TestPatchStruct(t *testing.T) {
 			FieldPtr *string
 		}
 
-		patcher := &patcherType{FieldPtr: xptr.Of("pointer")}
+		patcher := &patcherType{FieldPtr: new("pointer")}
 
 		patched, err := xreflect.PatchStruct(target, patcher)
 		xt.KO(t, err)
