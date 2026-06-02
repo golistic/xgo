@@ -35,10 +35,10 @@ func ErrorFromRPC(err error) error {
 		m = strings.TrimSpace(strings.TrimPrefix(m, "transport:"))
 		m = strings.TrimSpace(strings.TrimPrefix(m, "Error"))
 
-		return fmt.Errorf("%w (%s)", ErrServerUnavailable, fmt.Errorf(m))
+		return fmt.Errorf("%w (%s)", ErrServerUnavailable, errors.New(m))
 	}
 
 	m = strings.TrimSpace(strings.TrimPrefix(m, "proto:"))
 
-	return fmt.Errorf(m)
+	return errors.New(m)
 }

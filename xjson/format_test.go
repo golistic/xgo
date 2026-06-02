@@ -56,7 +56,7 @@ func TestFormat(t *testing.T) {
 		{
 			name:  "InvalidValue",
 			input: make(chan int),
-			want:  "JSON encoding failed (marshal): json: 2unsupported type: chan int",
+			want:  "JSON encoding failed (marshal): json: unsupported type: chan int",
 		},
 	}
 
