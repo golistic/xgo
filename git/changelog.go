@@ -17,7 +17,27 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-var reConventionalCommit = regexp.MustCompile(`^(feat|fix|hotfix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?: (.*)$`)
+var reConventionalCommit = regexp.MustCompile(
+	`^(feat|fix|hotfix|docs|style|refactor|perf|test|build|ci|chore|revert)` +
+		`(\([a-zA-Z0-9_-]+(?:\s*[|,;]\s*[a-zA-Z0-9_-]+)*\))?: (.*)$`)
+
+// scopeSeparators are the characters which separate multiple scopes within the
+// scope of a Conventional Commit, for example 'feat(api|cli)'.
+const scopeSeparators = "|,;"
+
+// firstScope returns the most significant scope of scope, which is the first
+// when multiple scopes are provided separated by any of scopeSeparators. The
+// scope argument is taken as matched, parentheses included.
+func firstScope(scope string) string {
+
+	scope = strings.Trim(scope, "()")
+
+	if i := strings.IndexAny(scope, scopeSeparators); i >= 0 {
+		scope = scope[:i]
+	}
+
+	return strings.TrimSpace(scope)
+}
 
 var conventionalMapping = map[string]string{
 	"feat":     "Added",
@@ -113,6 +133,10 @@ func (s *changelogSection) addEntry(name, message string) {
 // categorized changelog sections. The tag parameter is the next version tag to
 // include in the heading. Use skipTypes to omit certain Conventional Commit
 // types and skipScopes to omit specific scopes from the output.
+//
+// A commit may carry multiple scopes separated by any of scopeSeparators, for
+// example 'feat(api|cli)'. Only the first scope is used, as it is considered
+// the most significant; skipScopes is matched against that first scope only.
 func RenderChangelog(tag string, commits []string, skipTypes []string, skipScopes []string) string {
 
 	var changelog strings.Builder
@@ -135,7 +159,7 @@ func RenderChangelog(tag string, commits []string, skipTypes []string, skipScope
 
 		switch len(matches) {
 		case 4:
-			commitScope = strings.Trim(matches[2], "()")
+			commitScope = firstScope(matches[2])
 			commitMessage = matches[3]
 		case 3:
 			commitMessage = strings.TrimSpace(matches[2])
