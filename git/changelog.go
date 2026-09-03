@@ -7,6 +7,7 @@ package git
 import (
 	"bytes"
 	"fmt"
+	"maps"
 	"os/exec"
 	"regexp"
 	"slices"
@@ -17,8 +18,12 @@ import (
 	"golang.org/x/mod/semver"
 )
 
+// reConventionalCommit matches the subject line of a Conventional Commit. The
+// type is captured as any word so that custom types can be added through
+// WithTypeMapping; whether a type is used at all is decided by the type
+// mapping, not by this expression.
 var reConventionalCommit = regexp.MustCompile(
-	`^(feat|fix|hotfix|docs|style|refactor|perf|test|build|ci|chore|revert)` +
+	`^([a-zA-Z][a-zA-Z0-9_-]*)` +
 		`(\([a-zA-Z0-9_-]+(?:\s*[|,;]\s*[a-zA-Z0-9_-]+)*\))?: (.*)$`)
 
 // scopeSeparators are the characters which separate multiple scopes within the
@@ -39,6 +44,9 @@ func firstScope(scope string) string {
 	return strings.TrimSpace(scope)
 }
 
+// conventionalMapping holds the built-in Conventional Commit types and the
+// changelog section each is rendered under. Types absent from the mapping are
+// not rendered. Use WithTypeMapping to add your own.
 var conventionalMapping = map[string]string{
 	"feat":     "Added",
 	"fix":      "Fixed",
@@ -51,7 +59,101 @@ var conventionalMapping = map[string]string{
 	"chore":    "Changed",
 }
 
+// sectionOrder is the order in which the built-in sections are rendered.
 var sectionOrder = []string{"Added", "Changed", "Fixed"}
+
+// changelogConfig holds the settings which decide how commits are mapped onto
+// changelog sections, and in which order those sections are rendered.
+type changelogConfig struct {
+	typeMapping  map[string]string
+	sectionOrder []string
+}
+
+// ChangelogOption configures how commits are mapped onto changelog sections.
+// Options are accepted by RenderChangelog and GenerateChangelog.
+type ChangelogOption func(*changelogConfig)
+
+// newChangelogConfig returns the configuration with the built-in type mapping
+// and section order, with opts applied. The package level defaults are copied,
+// never modified.
+func newChangelogConfig(opts ...ChangelogOption) *changelogConfig {
+
+	cfg := &changelogConfig{
+		typeMapping:  maps.Clone(conventionalMapping),
+		sectionOrder: slices.Clone(sectionOrder),
+	}
+
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		opt(cfg)
+	}
+
+	return cfg
+}
+
+// sections returns the section names in the order they must be rendered. The
+// configured order comes first, followed by any other section named by the type
+// mapping, sorted alphabetically.
+func (c *changelogConfig) sections() []string {
+
+	order := slices.Clone(c.sectionOrder)
+
+	var extra []string
+	for _, section := range c.typeMapping {
+		if !slices.Contains(order, section) && !slices.Contains(extra, section) {
+			extra = append(extra, section)
+		}
+	}
+
+	slices.Sort(extra)
+
+	return append(order, extra...)
+}
+
+// WithTypeMapping adds Conventional Commit types and the changelog section each
+// is rendered under, for example {"cicd": "Changed"} or {"deps": "Dependencies"}.
+//
+// The mapping is added to the built-in types; an entry which is already known
+// is overridden. Entries with an empty type or an empty section are ignored. A
+// section which is not one of the built-in Added, Changed, and Fixed is
+// rendered after those, unless WithSectionOrder says otherwise.
+func WithTypeMapping(mapping map[string]string) ChangelogOption {
+
+	return func(cfg *changelogConfig) {
+		for commitType, section := range mapping {
+			commitType = strings.TrimSpace(commitType)
+			section = strings.TrimSpace(section)
+			if commitType == "" || section == "" {
+				continue
+			}
+			cfg.typeMapping[commitType] = section
+		}
+	}
+}
+
+// WithSectionOrder sets the order in which sections are rendered, replacing the
+// built-in Added, Changed, and Fixed order. Sections named by the type mapping
+// but not listed here are rendered after those which are, sorted
+// alphabetically. Passing no sections leaves the order unchanged.
+func WithSectionOrder(sections ...string) ChangelogOption {
+
+	return func(cfg *changelogConfig) {
+		var order []string
+		for _, section := range sections {
+			if section = strings.TrimSpace(section); section != "" {
+				order = append(order, section)
+			}
+		}
+
+		if len(order) == 0 {
+			return
+		}
+
+		cfg.sectionOrder = order
+	}
+}
 
 // LatestTag retrieves the most recent Git tag reachable from the given branch.
 // If branch is empty, it uses "main" by default. It returns the latest tag as a string.
@@ -137,7 +239,13 @@ func (s *changelogSection) addEntry(name, message string) {
 // A commit may carry multiple scopes separated by any of scopeSeparators, for
 // example 'feat(api|cli)'. Only the first scope is used, as it is considered
 // the most significant; skipScopes is matched against that first scope only.
-func RenderChangelog(tag string, commits []string, skipTypes []string, skipScopes []string) string {
+//
+// Use WithTypeMapping to render commit types beyond the built-in ones, and
+// WithSectionOrder to decide in which order the sections appear.
+func RenderChangelog(tag string, commits []string, skipTypes []string, skipScopes []string,
+	opts ...ChangelogOption) string {
+
+	cfg := newChangelogConfig(opts...)
 
 	var changelog strings.Builder
 
@@ -154,20 +262,10 @@ func RenderChangelog(tag string, commits []string, skipTypes []string, skipScope
 			continue
 		}
 
-		commitScope := ""
-		commitMessage := ""
+		commitScope := firstScope(matches[2])
+		commitMessage := matches[3]
 
-		switch len(matches) {
-		case 4:
-			commitScope = firstScope(matches[2])
-			commitMessage = matches[3]
-		case 3:
-			commitMessage = strings.TrimSpace(matches[2])
-		default:
-			continue
-		}
-
-		if header, exists := conventionalMapping[commitType]; exists {
+		if header, exists := cfg.typeMapping[commitType]; exists {
 			s, ok := sections[header]
 			if !ok {
 				s = newChangelogSection(header)
@@ -180,7 +278,7 @@ func RenderChangelog(tag string, commits []string, skipTypes []string, skipScope
 	changelog.WriteString(fmt.Sprintf("## [%s] - %s\n\n",
 		strings.TrimPrefix(tag, "v"), time.Now().Format(time.DateOnly)))
 
-	for _, s := range sectionOrder {
+	for _, s := range cfg.sections() {
 		section, ok := sections[s]
 		if !ok || len(section.entries) == 0 {
 			continue
@@ -188,7 +286,11 @@ func RenderChangelog(tag string, commits []string, skipTypes []string, skipScope
 
 		changelog.WriteString(fmt.Sprintf("### %s\n\n", section.name))
 
-		for scope, entries := range section.entries {
+		// Entries without a scope come first, the scoped ones follow sorted
+		// by scope; the empty scope sorts before any other.
+		for _, scope := range slices.Sorted(maps.Keys(section.entries)) {
+			entries := section.entries[scope]
+
 			if slices.Contains(skipScopes, scope) {
 				continue
 			}
@@ -306,9 +408,12 @@ func NextTag(tagBranch string, hotfix bool) (string, error) {
 //   - hotfix: whether to bump PATCH instead of MINOR
 //   - skipTypes: Conventional Commit types to omit (e.g., feat, fix, chore)
 //   - skipScopes: scopes to omit from the output
+//   - opts: options such as WithTypeMapping and WithSectionOrder, which are
+//     passed on to RenderChangelog
 //
 // Returns the rendered changelog, or an error.
-func GenerateChangelog(tagBranch string, hotfix bool, skipTypes []string, skipScopes []string) (string, error) {
+func GenerateChangelog(tagBranch string, hotfix bool, skipTypes []string, skipScopes []string,
+	opts ...ChangelogOption) (string, error) {
 
 	latestTag, err := LatestTag(tagBranch)
 	if err != nil {
@@ -325,7 +430,7 @@ func GenerateChangelog(tagBranch string, hotfix bool, skipTypes []string, skipSc
 		return "", fmt.Errorf("commits since %s: %w", latestTag, err)
 	}
 
-	entry := RenderChangelog(nextTag, commits, skipTypes, skipScopes)
+	entry := RenderChangelog(nextTag, commits, skipTypes, skipScopes, opts...)
 
 	return entry, nil
 }
