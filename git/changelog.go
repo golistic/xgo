@@ -286,7 +286,11 @@ func RenderChangelog(tag string, commits []string, skipTypes []string, skipScope
 
 		changelog.WriteString(fmt.Sprintf("### %s\n\n", section.name))
 
-		for scope, entries := range section.entries {
+		// Entries without a scope come first, the scoped ones follow sorted
+		// by scope; the empty scope sorts before any other.
+		for _, scope := range slices.Sorted(maps.Keys(section.entries)) {
+			entries := section.entries[scope]
+
 			if slices.Contains(skipScopes, scope) {
 				continue
 			}

@@ -161,6 +161,41 @@ func TestRenderChangelogTypeMapping(t *testing.T) {
 	})
 }
 
+func TestRenderChangelogScopeOrder(t *testing.T) {
+	t.Run("UnscopedFirstThenSorted", func(t *testing.T) {
+		commits := []string{
+			"feat(sdk): add sdk thing",
+			"feat(api): add api thing",
+			"feat: add plain thing",
+			"feat(cli): add cli thing",
+		}
+
+		got := RenderChangelog("v1.2.0", commits, nil, nil)
+		want := "### Added\n\n" +
+			"- add plain thing\n" +
+			"- **api**: add api thing\n" +
+			"- **cli**: add cli thing\n" +
+			"- **sdk**: add sdk thing\n"
+
+		xt.Assert(t, strings.Contains(got, want), "expected %q, got %q", want, got)
+	})
+
+	t.Run("Deterministic", func(t *testing.T) {
+		commits := []string{
+			"feat(sdk): add sdk thing",
+			"feat: add plain thing",
+			"feat(api): add api thing",
+			"fix(cli): correct cli thing",
+			"fix(api): correct api thing",
+		}
+
+		want := RenderChangelog("v1.2.0", commits, nil, nil)
+		for range 20 {
+			xt.Eq(t, want, RenderChangelog("v1.2.0", commits, nil, nil))
+		}
+	})
+}
+
 func TestRenderChangelogSectionOrder(t *testing.T) {
 	commits := []string{"feat: add thing", "fix: correct thing", "deps: bump x"}
 
