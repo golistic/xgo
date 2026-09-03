@@ -7,12 +7,21 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/golistic/xgo/git"
 )
 
 func main() {
+
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	var hotfix bool
 	flag.BoolVar(&hotfix, "hotfix", false, "Calculate the next PATCH version instead of MINOR")
 
@@ -53,8 +62,7 @@ func main() {
 	if flagTypeMap != "" {
 		typeMap, err := parseTypeMap(flagTypeMap)
 		if err != nil {
-			fmt.Println("Error parsing type map:", err)
-			return
+			return fmt.Errorf("parsing type map: %w", err)
 		}
 		opts = append(opts, git.WithTypeMapping(typeMap))
 	}
@@ -66,22 +74,27 @@ func main() {
 	if tagOnly {
 		tag, err := git.NextTag(tagBranch, hotfix)
 		if err != nil {
-			fmt.Println("Error calculating next tag:", err)
-			return
+			return fmt.Errorf("calculating next tag: %w", err)
 		}
 		if tag != "" {
-			println(tag)
+			fmt.Println(tag)
 		}
-		return
+		return nil
 	}
 
-	if out, err := git.GenerateChangelog(tagBranch, hotfix, skipTypes, skipScopes, opts...); err != nil {
-		fmt.Println("Error generating changelog:", err)
-	} else if out != "" {
-		fmt.Print(out)
-	} else {
-		fmt.Println("No changes detected.")
+	out, err := git.GenerateChangelog(tagBranch, hotfix, skipTypes, skipScopes, opts...)
+	if err != nil {
+		return fmt.Errorf("generating changelog: %w", err)
 	}
+
+	if out == "" {
+		fmt.Fprintln(os.Stderr, "No changes detected.")
+		return nil
+	}
+
+	fmt.Print(out)
+
+	return nil
 }
 
 // parseTypeMap turns a comma-separated list of type=section pairs into the
